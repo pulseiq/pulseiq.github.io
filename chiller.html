@@ -126,7 +126,7 @@
                 <td colspan="2">
                     Chiller Status
                 </td>
-                <td id="chillerStatus"><img src="images/green.png" height="32px" /> </td>
+                <td id="chillerStatus"><img src="green.png" height="32px" /> </td>
             </tr>
 
             <tr>
@@ -351,9 +351,9 @@
                         $('.fan').find('.percent').val(state.fan+"%");
 
                         if (state.chiller)
-                            $('#chillerStatus').html('<img src="images/green.png" height="32px" />');
+                            $('#chillerStatus').html('<img src="green.png" height="32px" />');
                         else
-                            $('#chillerStatus').html('<img src="images/black.png" height="32px" />');
+                            $('#chillerStatus').html('<img src="black.png" height="32px" />');
 
                         $('#vfdStatus').html(state.speed + "%");
 
