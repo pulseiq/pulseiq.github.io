@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>PACE-VFD-CONTROL!</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+
+    <style>
+        body {
+            min-height: 2000px;
+            padding-top: 70px;
+        }
+    </style>
+
+    <style class="cp-pen-styles">h2 {
+            margin-bottom:0;
+        }
+        h3 {
+            margin:0 0 30px;
+        }
+        .ui-slider-range {
+            background:green;
+        }
+        .percent {
+            color:green;
+            font-weight:bold;
+            text-align:center;
+            width:75%;
+            border:none;
+        }
+    </style>
+
+</head>
+<body>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><b>PACE Chiller Algorythm Simulation 0.0.1</b></a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Main component for a primary marketing message or call to action -->
+    <div class="jumbotron">
+
+        <table class="table table-dark">
+            <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Simulation</th>
+                <th scope="col">Description</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr>
+                <td>Time</td>
+                <td>
+
+                    <div class="hour row">
+                        <div>
+                            <h4>
+                                <input type="text" class="percent" readonly />
+                            </h4>
+                            <div class="bar" style="width:75%;"></div>
+                        </div>
+                    </div>
+
+                </td>
+                <td id="hourText">Set the hour of the day 0-23.</td>
+            </tr>
+
+            <tr>
+                <td>Delta T</td>
+                <td>
+
+                    <div class="deltaT row">
+                        <div>
+                            <h4>
+                                <input type="text" class="percent" readonly />
+                            </h4>
+                            <div class="bar" style="width:75%;"></div>
+                        </div>
+                    </div>
+
+                </td>
+                <td id="deltaTText">Set the Delta T</td>
+            </tr>
+
+            <tr>
+                <td>Fan Demand</td>
+                <td>
+
+                    <div class="fan row">
+                        <div>
+                            <h4>
+                                <input type="text" class="percent" readonly />
+                            </h4>
+                            <div class="bar" style="width:75%;"></div>
+                        </div>
+                    </div>
+
+                </td>
+                <td id="fanText">Set what percentage of fans are on.</td>
+            </tr>
+
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col">Status</th>
+
+            <tr>
+                <td colspan="2">
+                    Chiller Status
+                </td>
+                <td id="chillerStatus"><img src="images/green.png" height="32px" /> </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    VFD Status
+                </td>
+                <td id="vfdStatus">50%</td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    Thermostat Setback
+                </td>
+                <td id="setbackStatus">-2&deg;</td>
+            </tr>
+
+            <tr>
+                <td colspan="3"/>
+            </tr>
+
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Control</th>
+                <th scope="col">Status</th>
+            </tr>
+
+            <tr>
+                <td>On/Off</td>
+                <td>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary active" id="onBtn">
+                            <input type="radio" name="options" id="onInput" autocomplete="off">On
+                        </label>
+                        <label class="btn btn-primary" id="offBtn">
+                            <input type="radio" name="options" id="offInput" autocomplete="off" checked>Off
+                        </label>
+                    </div>
+                </td>
+                <td id="onVoltage">0v</td>
+            </tr>
+
+            <tr>
+                <td>Direction</td>
+                <td>
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary active" id="forwardBtn" >
+                            <input type="radio" name="options" id="forwardInput" autocomplete="off" checked>Forward
+                        </label>
+                        <label class="btn btn-primary" id="reverseBtn">
+                            <input type="radio" name="options" id="reverseInput" autocomplete="off">Reverse
+                        </label>
+                    </div>
+                </td>
+                <td id="directionVoltage">0v</td>
+            </tr>
+
+
+            <tr>
+                <td></td>
+                <td>
+                    <!--
+        <div class="form-check">
+        <button id="serverBtn" type="button" class="btn btn-primary">Send Server Update</button>
+        </div>
+        -->
+
+                    <div class="form-check">
+                        <button id="updateBtn" type="button" class="btn btn-primary">Update Status</button>
+                    </div>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+
+        <!--
+        <p>
+          <a class="btn btn-lg btn-primary" href="../../components/#navbar" role="button">Update</a>
+        </p>
+        -->
+
+
+        <script>
+            $(function() {
+
+                $('.hour').each(function() {
+                    var $projectBar = $(this).find('.bar');
+                    var $projectPercent = $(this).find('.percent');
+                    var $projectRange = $(this).find('.ui-slider-range');
+                    $projectBar.slider({
+                        range: "min",
+                        animate: true,
+                        value: 1,
+                        min: 0,
+                        max: 23,
+                        step: 1,
+                        slide: function(event, ui) {
+                            $projectPercent.val(ui.value + ":00");
+                        },
+                        change: function(event, ui) {
+                            var $projectRange = $(this).find('.ui-slider-range');
+                            var percent = ui.value;
+
+                            state.hour = percent;
+                            processRules();
+                            sendState();
+                        }
+                    });
+                })
+
+
+                $('.deltaT').each(function() {
+                    var $projectBar = $(this).find('.bar');
+                    var $projectPercent = $(this).find('.percent');
+                    var $projectRange = $(this).find('.ui-slider-range');
+                    $projectBar.slider({
+                        range: "min",
+                        animate: true,
+                        value: 1,
+                        min: 0,
+                        max: 25,
+                        step: 1,
+                        slide: function(event, ui) {
+                            $projectPercent.val(ui.value + " ");
+                        },
+                        change: function(event, ui) {
+                            var $projectRange = $(this).find('.ui-slider-range');
+                            var percent = ui.value;
+
+                            state.deltaT = percent;
+                            processRules();
+                            sendState();
+                        }
+                    });
+                })
+
+
+                $('.fan').each(function() {
+                    var $projectBar = $(this).find('.bar');
+                    var $projectPercent = $(this).find('.percent');
+                    var $projectRange = $(this).find('.ui-slider-range');
+                    $projectBar.slider({
+                        range: "min",
+                        animate: true,
+                        value: 1,
+                        min: 0,
+                        max: 100,
+                        step: 1,
+                        slide: function(event, ui) {
+                            $projectPercent.val(ui.value +"%");
+                        },
+                        change: function(event, ui) {
+                            var $projectRange = $(this).find('.ui-slider-range');
+                            var percent = ui.value;
+
+                            state.fan = percent;
+                            processRules();
+                            sendState();
+                        }
+                    });
+                })
+
+
+            })
+        </script>
+
+        <script>
+            var ably = Ably.Realtime('Ag5PGQ.a12hnw:C4_dy3JlaDA6kMO8');
+            var vfdChannel;
+            var blockSend = false;
+
+            var state = {
+                hour: 9,
+                deltaT: 3,
+                demand: 30,
+                setback: 0,
+                chiller: false,
+                speed: 0,
+                on: false,
+                direction: false
+            };
+
+            var vfdStatus = {
+                speedVoltage: 0,
+                onVoltage: 0,
+                directionVoltage: 0
+            };
+
+            $(function() {
+                initConnection();
+            });
+
+            function initConnection() {
+                console.log("Connecting-v2");
+                ably.connection.on('connected', function() {
+                    console.log("Ably connected");
+                    sendQuery();
+                });
+
+                ably.connection.on('failed', function() {
+                    console.log("Ably disconnected");
+                });
+
+                vfdChannel = ably.channels.get('vfd');
+
+                vfdChannel.subscribe( function(msg) {
+                    console.log("Rx: " + msg.name + " : " + msg.data);
+                    var data = JSON.parse(msg.data);
+                    <!-- ------------------------- -->
+                    if (msg.name == "vfd-state") {
+                        state = data;
+                        blockSend = true;
+
+                        $('.hour').find('.bar').slider('value',state.hour);
+                        $('.hour').find('.percent').val(state.hour+":00");
+
+
+                        $('.deltaT').find('.bar').slider('value',state.deltaT);
+                        $('.deltaT').find('.percent').val(state.deltaT+" ");
+
+                        $('.fan').find('.bar').slider('value',state.fan);
+                        $('.fan').find('.percent').val(state.fan+"%");
+
+                        if (state.chiller)
+                            $('#chillerStatus').html('<img src="images/green.png" height="32px" />');
+                        else
+                            $('#chillerStatus').html('<img src="images/black.png" height="32px" />');
+
+                        $('#vfdStatus').html(state.speed + "%");
+
+                        $('#setbackStatus').html(state.setback + "&deg;");
+
+                        if (state.on) {
+                            $('#onBtn').addClass('active');
+                            $('#offBtn').removeClass('active');
+                        } else {
+                            $('#onBtn').removeClass('active');
+                            $('#offBtn').addClass('active');
+                        }
+                        if (state.direction) {
+                            $('#forwardBtn').addClass('active');
+                            $('#reverseBtn').removeClass('active');
+                        } else {
+                            $('#forwardBtn').removeClass('active');
+                            $('#reverseBtn').addClass('active');
+                        }
+
+                        blockSend = false;
+                    } else if (msg.name == "vfd-status") {
+                        console.log("vfd-status");
+                        vfdStatus = data;
+                        $('#speedVoltage').html(vfdStatus.speedVoltage.toFixed(2)+"v");
+                        $('#onVoltage').html(vfdStatus.onVoltage.toFixed(2)+"v");
+                        $('#directionVoltage').html(vfdStatus.directionVoltage.toFixed(2)+"v");
+                    }
+                });
+            }
+
+            function processRules() {
+
+                if (state.hour <= 5) {
+                    // Midnight to 5am
+                    if (state.fan <= 20) {
+                        state.chiller = false;
+                        state.speed = 30;
+                        state.setback = -2;
+                    }  else if (state.fan >= 30) {
+                        state.chiller = true;
+                        state.setback = 0;
+                        computeDeltaTSpeed();
+                    }
+                } else {
+                    // After 5am
+                    state.chiller = true;
+                    state.setback = 0;
+                    computeDeltaTSpeed();
+                }
+            }
+
+            function computeDeltaTSpeed() {
+                if (state.deltaT <= 3)
+                    state.speed = 30;
+                else if (state.deltaT <= 5)
+                    state.speed = 40;
+                else if (state.deltaT <= 7)
+                    state.speed = 50;
+                else if (state.deltaT <= 9)
+                    state.speed = 60;
+                else if (state.deltaT <= 11)
+                    state.speed = 70;
+                else if (state.deltaT <= 13)
+                    state.speed = 80;
+                else if (state.deltaT <= 15)
+                    state.speed = 90;
+                else
+                    state.speed = 100;
+
+                console.log("Computed speed = "+state.speed);
+            }
+
+            function sendState() {
+                //console.log("Ably : " + ably.isConnected());
+                if (blockSend) return;
+                vfdChannel.publish("vfd-set-state",JSON.stringify(state), function(err) {
+                    if (err)
+                        console.log()
+                })
+            }
+
+            function sendQuery() {
+                //console.log("Ably : " + ably.isConnected());
+                vfdChannel.publish("vfd-query",null, function(err) {
+                    if (err)
+                        console.log()
+                })
+            }
+
+            $("#serverBtn").click( function() {
+                vfdChannel.publish("vfd-state",JSON.stringify(state), function(err) {
+                    if (err)
+                        console.log()
+                })
+            });
+
+            $("#updateBtn").click( function() {
+                vfdChannel.publish("vfd-update",JSON.stringify(state), function(err) {
+                    if (err)
+                        console.log()
+                })
+            });
+
+            $("#onBtn").click( function() {
+                state.on = true;
+                sendState();
+            });
+
+            $("#offBtn").click( function() {
+                state.on = false;
+                sendState();
+            });
+
+            $("#forwardBtn").click( function() {
+                state.direction = true;
+                sendState();
+            });
+
+            $("#reverseBtn").click( function() {
+                state.direction = false;
+                sendState();
+            });
+
+        </script>
+
+    </div>
+
+</div> <!-- /container -->
+
+
+</body>
+
+
+</html>
